@@ -67,7 +67,7 @@ jobs:
           context: ./zhparser
           push: ${{ github.event_name != 'pull_request' }}
           tags:
-            - ${{ env.POSTGRES_VERSION+'-zhparser' }}
+            - ${{ env.POSTGRES_VERSION }}-zhparser
             - zhparser
           labels: ${{ steps.meta.outputs.labels }}
 
@@ -77,7 +77,7 @@ jobs:
           context: ./postgis
           push: ${{ github.event_name != 'pull_request' }}
           tags:
-            - ${{ env.POSTGRES_VERSION + '-postgis' }}
+            - ${{ env.POSTGRES_VERSION }}-postgis
             - latest
             - postgis
           labels: ${{ steps.meta.outputs.labels }}
