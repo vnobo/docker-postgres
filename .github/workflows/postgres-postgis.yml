@@ -53,7 +53,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           flavor: |
-            latest=true
+            latest=false
             suffix=-postgis
           images: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
