@@ -16,7 +16,7 @@ on:
 
 env:
   # Use docker.io for Docker Hub if empty
-  REGISTRY: ghcr.io
+  REGISTRY: ghcr.io/${{ github.actor }}
   # github.repository as <account>/<repo>
   IMAGE_NAME: postgres
   # Postgresql version
@@ -51,7 +51,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker 17 images
+      - name: Build and push Docker images
         uses: docker/build-push-action@v6
         with:
           context: .
