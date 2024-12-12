@@ -74,8 +74,5 @@ jobs:
         with:
           context: ./postgis
           push: ${{ github.event_name != 'pull_request' }}
-          tags:
-            - ${{ env.POSTGRES_VERSION }}-postgis
-            - latest
-            - postgis
+          tags: ${{ env.POSTGRES_VERSION }}-postgis,latest,postgis
           labels: ${{ steps.meta.outputs.labels }}
