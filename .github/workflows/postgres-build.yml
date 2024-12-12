@@ -44,10 +44,10 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           flavor: |
-            latest=auto
+            latest=false
           images: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-            alexbob/${{ env.IMAGE_NAME }}
+          #  alexbob/${{ env.IMAGE_NAME }}
           # generate Docker tags based on the following events/attributes
           tags: |
             ${{ env.POSTGRES_VERSION }}
