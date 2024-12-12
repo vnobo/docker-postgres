@@ -66,9 +66,7 @@ jobs:
         with:
           context: ./zhparser
           push: ${{ github.event_name != 'pull_request' }}
-          tags:
-            - ${{ env.POSTGRES_VERSION }}-zhparser
-            - zhparser
+          tags: ${{ env.POSTGRES_VERSION }}-zhparser,zhparser
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Build and push Docker images
