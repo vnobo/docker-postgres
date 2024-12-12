@@ -57,7 +57,7 @@ jobs:
             suffix=-postgis
           images: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-            alexbob/${{ env.IMAGE_NAME }}
+            docker.io/alexbob/${{ env.IMAGE_NAME }}
           # generate Docker tags based on the following events/attributes
           tags: |
             ${{ env.POSTGRES_VERSION }}
