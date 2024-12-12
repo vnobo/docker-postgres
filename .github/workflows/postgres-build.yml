@@ -4,7 +4,7 @@
 # documentation.
 # This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
-
+environment: BASE
 name: Postgresql Build
 run-name: ${{ github.actor }} is Build Postgresql Actions
 on:
@@ -13,7 +13,6 @@ on:
     tags:
       - "v*.*.*"
   pull_request:
-
 env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io/${{ github.actor }}
@@ -24,7 +23,6 @@ env:
 jobs:
   build-image:
     runs-on: ubuntu-latest
-    environment.name: BASE
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
