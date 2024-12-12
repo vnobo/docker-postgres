@@ -13,7 +13,8 @@ on:
     branches: [ "main","15","16" ]
     tags:
       - "v*"
-  pull_request:
+  release:
+    types: [ created ]
 env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io/${{ github.actor }}
@@ -44,7 +45,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           flavor: |
-            latest=auto
+            latest=true
             suffix=-postgis
           images: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
