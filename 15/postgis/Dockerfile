@@ -1,5 +1,5 @@
-ARG PG_CONTAINER_VERSION=latest
-FROM postgis/postgis:${PG_CONTAINER_VERSION} AS builder
+ARG PG_CONTAINER_VERSION=15
+FROM postgis/postgis:${PG_CONTAINER_VERSION}-master AS builder
 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN set -ex \
@@ -19,7 +19,7 @@ RUN set -ex \
   && cd zhparser \
   && make install
 
-FROM postgis/postgis:${PG_CONTAINER_VERSION}
+FROM postgis/postgis:${PG_CONTAINER_VERSION}-master
 RUN localedef -i zh_CN -c -f UTF-8 -A /usr/share/locale/locale.alias zh_CN.UTF-8
 ENV LANG=zh_CN.UTF-8
 
