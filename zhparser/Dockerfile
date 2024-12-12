@@ -1,4 +1,4 @@
-ARG PG_CONTAINER_VERSION=17
+ARG PG_CONTAINER_VERSION=15
 FROM docker.io/library/postgres:${PG_CONTAINER_VERSION}-bookworm AS builder
 
 ARG DEBIAN_FRONTEND=noninteractive

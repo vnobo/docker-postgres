@@ -1,4 +1,4 @@
-FROM postgres:17
+FROM postgres:15
 
 # 设置时区
 RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
