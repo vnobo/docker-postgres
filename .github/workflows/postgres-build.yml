@@ -58,17 +58,20 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: [${{ env.POSTGRES_VERSION }}]
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v6
+        with:
+          context: ./zhparser
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: [${{ env.POSTGRES_VERSION+'-zhparser' }},"zhparser"]
           labels: ${{ steps.meta.outputs.labels }}
 
-      #- name: Docker Setup Buildx
-      #  uses: docker/setup-buildx-action@v3
-
-      #- name: Build zhparser Docker image
-      #  run: docker buildx build --push  -t ${{ vars.DOCKER_PREFIX }}/postgres:17-zhparser ./boot/postgres/zhparser
-
-      #- name: Build postgis Docker image
-      #  run: docker buildx build --push  -t ${{ vars.DOCKER_PREFIX }}/postgres:17-postgis ./boot/postgres/postgis
-
-      #- name: Build latest Docker image
-      #  run: docker buildx build --push -t ${{ vars.DOCKER_PREFIX }}/postgres:latest ./boot/postgres/postgis
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v6
+        with:
+          context: ./postgis
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: [ ${{ env.POSTGRES_VERSION + '-postgis' }},"latest","postgis"]
+          labels: ${{ steps.meta.outputs.labels }}
