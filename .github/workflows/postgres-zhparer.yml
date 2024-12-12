@@ -21,7 +21,7 @@ env:
   # github.repository as <account>/<repo>
   IMAGE_NAME: postgres
   # Postgresql version
-  POSTGRES_VERSION: 17
+  POSTGRES_VERSION: 16
 jobs:
   build-image:
     environment: base
