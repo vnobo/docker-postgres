@@ -53,22 +53,22 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker Local images
+      - name: Build and push Docker 17 images
         uses: docker/build-push-action@v6
         with:
-          context: ./boot/postgres
+          context: ./17/postgres
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      - name: Docker Setup Buildx
-        uses: docker/setup-buildx-action@v3
+      #- name: Docker Setup Buildx
+      #  uses: docker/setup-buildx-action@v3
 
-      - name: Build zhparser Docker image
-        run: docker buildx build --push  -t ${{ vars.DOCKER_PREFIX }}/postgres:17-zhparser ./boot/postgres/zhparser
+      #- name: Build zhparser Docker image
+      #  run: docker buildx build --push  -t ${{ vars.DOCKER_PREFIX }}/postgres:17-zhparser ./boot/postgres/zhparser
 
-      - name: Build postgis Docker image
-        run: docker buildx build --push  -t ${{ vars.DOCKER_PREFIX }}/postgres:17-postgis ./boot/postgres/postgis
+      #- name: Build postgis Docker image
+      #  run: docker buildx build --push  -t ${{ vars.DOCKER_PREFIX }}/postgres:17-postgis ./boot/postgres/postgis
 
-      - name: Build latest Docker image
-        run: docker buildx build --push -t ${{ vars.DOCKER_PREFIX }}/postgres:latest ./boot/postgres/postgis
+      #- name: Build latest Docker image
+      #  run: docker buildx build --push -t ${{ vars.DOCKER_PREFIX }}/postgres:latest ./boot/postgres/postgis
