@@ -7,10 +7,12 @@
 name: Postgresql Build
 run-name: ${{ github.actor }} is Build Postgresql Actions
 on:
+  schedule:
+    - cron: "0 10 * * *"
   push:
-    branches: [ "main","dev" ]
+    branches: [ "main","15","16"]
     tags:
-      - "v*.*.*"
+      - "v*"
   pull_request:
 env:
   # Use docker.io for Docker Hub if empty
