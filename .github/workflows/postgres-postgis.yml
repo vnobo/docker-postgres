@@ -4,7 +4,7 @@
 # documentation.
 # This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
-name: Postgresql Build
+name: Postgresql Postgis Build
 run-name: ${{ github.actor }} is Build Postgresql Actions
 on:
   schedule:
@@ -45,6 +45,7 @@ jobs:
         with:
           flavor: |
             latest=auto
+            suffix=postgis
           images: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
             alexbob/${{ env.IMAGE_NAME }}
@@ -55,7 +56,7 @@ jobs:
       - name: Build and push Docker images
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./postgis
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
