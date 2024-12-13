@@ -8,7 +8,7 @@ name: Postgresql Postgis Build
 run-name: ${{ github.actor }} is Build Postgresql 17 Postgis Actions
 on:
   schedule:
-    - cron: "0 10 * * *"
+    - cron: "2 11 * * *"
   push:
     branches: [ "main","15","16" ]
     tags:
