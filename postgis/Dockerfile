@@ -4,7 +4,7 @@ FROM postgis/postgis:${PG_CONTAINER_VERSION}-master AS builder
 ARG DEBIAN_FRONTEND=noninteractive
 RUN set -ex \
   && apt-get update \
-  && apt-get install -y build-essential git postgresql-server-dev-${PG_MAJOR} pkg-config binutils automake libtool \
+  && apt-get install -y build-essential git postgresql-server-dev-${PG_MAJOR} pkg-config binutils automake libtool clang-13 \
   && apt-get clean
 
 RUN set -ex \
