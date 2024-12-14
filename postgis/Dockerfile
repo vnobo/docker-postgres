@@ -24,7 +24,7 @@ RUN localedef -i zh_CN -c -f UTF-8 -A /usr/share/locale/locale.alias zh_CN.UTF-8
 ENV LANG=zh_CN.UTF-8
 
 LABEL org.opencontainers.image.source=https://github.com/vnobo/docker-postgres.git
-LABEL org.opencontainers.image.description="Docker build postgresql database images , text search support chinese zhparser extension and postgis extension"
+LABEL org.opencontainers.image.description="Docker build postgresql database images,text search support chinese zhparser extension and postgis extension"
 LABEL org.opencontainers.image.licenses=MIT
 
 COPY --from=builder /usr/lib/postgresql/${PG_MAJOR}/lib/zhparser.so /usr/lib/postgresql/${PG_MAJOR}/lib/
