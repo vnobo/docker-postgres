@@ -1,13 +1,8 @@
 FROM postgres:17
 
 LABEL org.opencontainers.image.source=https://github.com/vnobo/docker-postgres.git
-LABEL org.opencontainers.image.description=DESCRIPTION
+LABEL org.opencontainers.image.description="Docker build postgresql database images,Set LANG zh_CN."
 LABEL org.opencontainers.image.licenses=MIT
-LABEL org.opencontainers.image.title=TITLE
-LABEL org.opencontainers.image.url=https://github.com/vnobo/docker-postgres.git
-LABEL org.opencontainers.image.version=VERSION
-LABEL org.opencontainers.image.created=CREATED
-LABEL org.opencontainers.image.revision=REVISION
 
 # 设置时区
 RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
