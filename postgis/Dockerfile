@@ -23,12 +23,12 @@ FROM postgis/postgis:${PG_CONTAINER_VERSION}-master
 RUN localedef -i zh_CN -c -f UTF-8 -A /usr/share/locale/locale.alias zh_CN.UTF-8
 ENV LANG=zh_CN.UTF-8
 
-LABEL org.opencontainers.image.source=https://github.com/vnobo/plate
-LABEL org.opencontainers.image.description="Plate platform container image"
+LABEL org.opencontainers.image.source=https://github.com/vnobo/docker-postgres.git
+LABEL org.opencontainers.image.description="Docker PostgreSQL postgis container image"
 LABEL org.opencontainers.image.licenses=MIT
-LABEL org.opencontainers.image.title=plate-platform
-LABEL org.opencontainers.image.url=https://github.com/vnobo/plate
-LABEL org.opencontainers.image.version=3.4.0
+LABEL org.opencontainers.image.title=Docker PostgreSQL postgis
+LABEL org.opencontainers.image.url=https://github.com/vnobo/docker-postgres.git
+LABEL org.opencontainers.image.version=17
 LABEL org.opencontainers.image.created=2020-01-10T00:30:00.000Z
 LABEL org.opencontainers.image.revision=860c1904a1ce19322e91ac35af1ab07466440c37
 
