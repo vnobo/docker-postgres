@@ -17,10 +17,9 @@ on:
     types: [ created ]
 env:
   # Use docker.io for Docker Hub if empty
-  REGISTRY: ghcr.io/${{ github.actor }}
-  # github.repository as <account>/<repo>
+  GITHUB_REGISTRY: ghcr.io/${{ github.actor }}
+  DOCKER_REGISTRY: docker.io/alexbob
   IMAGE_NAME: postgres
-  # Postgresql version
   POSTGRES_VERSION: 17
 jobs:
   build-image:
@@ -65,8 +64,8 @@ jobs:
           flavor: |
             latest=false
           images: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-            docker.io/alexbob/${{ env.IMAGE_NAME }}
+            ${{ env.GITHUB_REGISTRY }}/${{ env.IMAGE_NAME }}
+            ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}
           # generate Docker tags based on the following events/attributes
           tags: |
             ${{ env.POSTGRES_VERSION }}
@@ -80,9 +79,10 @@ jobs:
         with:
           platforms: ${{ matrix.platform }}
           context: .
-          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=image,name=${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
+
       - name: Export digest
         run: |
           mkdir -p /tmp/digests
