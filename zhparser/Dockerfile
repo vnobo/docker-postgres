@@ -1,5 +1,5 @@
 ARG PG_CONTAINER_VERSION=17
-FROM docker.io/library/postgres:${PG_CONTAINER_VERSION}-bookworm AS builder
+FROM postgres:${PG_CONTAINER_VERSION} AS builder
 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN set -ex \
@@ -19,7 +19,7 @@ RUN set -ex \
   && cd zhparser \
   && make install
 
-FROM docker.io/library/postgres:${PG_CONTAINER_VERSION}-bookworm
+FROM postgres:${PG_CONTAINER_VERSION}
 RUN localedef -i zh_CN -c -f UTF-8 -A /usr/share/locale/locale.alias zh_CN.UTF-8
 ENV LANG=zh_CN.UTF-8
 
