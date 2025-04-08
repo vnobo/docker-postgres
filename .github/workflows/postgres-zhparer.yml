@@ -8,7 +8,7 @@ name: Postgresql Zhparer Build
 run-name: ${{ github.actor }} is Build Postgresql 17 Zhparer Actions
 on:
   schedule:
-    - cron: "3 12 * * *"
+    - cron: "3 12 7 * *"
   push:
     branches: [ "main","15","16" ]
     tags:

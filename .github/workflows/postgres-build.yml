@@ -8,7 +8,7 @@ name: Postgresql Build
 run-name: ${{ github.actor }} is Build Postgresql 17 Actions
 on:
   schedule:
-    - cron: "1 10 * * *"
+    - cron: "1 10 6 * *"
   push:
     branches: [ "main","15","16" ]
     tags:
