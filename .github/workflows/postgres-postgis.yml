@@ -5,12 +5,12 @@
 # This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
 name: Postgresql Postgis Build
-run-name: ${{ github.actor }} is Build Postgresql 17 Postgis Actions
+run-name: ${{ github.actor }} is Build Postgresql 18 Postgis Actions
 on:
   schedule:
     - cron: "2 11 8 * *"
   push:
-    branches: [ "main","15","16" ]
+    branches: [ "main" ]
     tags:
       - "v*"
   release:
@@ -21,7 +21,7 @@ env:
   # github.repository as <account>/<repo>
   IMAGE_NAME: postgres
   # Postgresql version
-  POSTGRES_VERSION: 17
+  POSTGRES_VERSION: 18
 jobs:
   build-image:
     environment: base

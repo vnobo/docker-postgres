@@ -1,4 +1,4 @@
-FROM postgres:17
+FROM postgres:18
 
 LABEL org.opencontainers.image.source=https://github.com/vnobo/docker-postgres.git
 LABEL org.opencontainers.image.description="Docker build postgresql database images,Set LANG zh_CN."
