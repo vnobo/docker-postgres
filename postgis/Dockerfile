@@ -1,5 +1,5 @@
 ARG PG_CONTAINER_VERSION=18
-FROM postgis/postgis:${PG_CONTAINER_VERSION}-master AS builder
+FROM postgis/postgis:${PG_CONTAINER_VERSION}-3.6 AS builder
 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN set -ex \
