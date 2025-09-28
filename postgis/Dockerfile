@@ -19,7 +19,7 @@ RUN set -ex \
   && cd zhparser \
   && make install
 
-FROM postgis/postgis:${PG_CONTAINER_VERSION}-master
+FROM postgis/postgis:${PG_CONTAINER_VERSION}-3.6
 RUN localedef -i zh_CN -c -f UTF-8 -A /usr/share/locale/locale.alias zh_CN.UTF-8
 ENV LANG=zh_CN.UTF-8
 
