@@ -2,9 +2,9 @@
 
 Docker build postgresql database images , text search support chinese zhparser extension and postgis extension
 
-## Postgresql 17
+## Postgresql 18
 
-### Docker build postgresql 17 image with postgres:17
+### Docker build postgresql 18 image with postgres:18
 
 Set lang is zh_CN.UTF-8
 
@@ -15,12 +15,12 @@ See [Postgres Dockerfile](./Dockerfile)
 #### Get Docker Image
 
 ```bash
-docker pull ghcr.io/vnobo/postgres:17
+docker pull ghcr.io/vnobo/postgres:18
 ```
 
-## Postgresql 17 with zhparser
+## Postgresql 18 with zhparser
 
-### Docker build postgresql 17 image with postgres:17-bookworm
+### Docker build postgresql 18 image with postgres:18-bookworm
 
 1. add build postgresql zhparser extension
 2. set lang is zh_CN.UTF-8
@@ -30,12 +30,12 @@ See [Postgres Zhparser Dockerfile](./zhparser/Dockerfile)
 Get Docker Image
 
 ```bash
-docker pull ghcr.io/vnobo/postgres:17-zhparser
+docker pull ghcr.io/vnobo/postgres:18-zhparser
 ```
 
-## Postgresql 17 with postgis
+## Postgresql 18 with postgis
 
-### Docker build postgresql 17 image with postgis:17-master
+### Docker build postgresql 18 image with postgis:18-master
 
 1. add postgresql postgis extension
 2. add postgresql zhparser extension
@@ -46,5 +46,5 @@ See [Postgres Postgis Dockerfile](./postgis/Dockerfile)
 Get Docker Image
 
 ```bash
-docker pull ghcr.io/vnobo/postgres:17-postgis
+docker pull ghcr.io/vnobo/postgres:18-postgis
 ```
