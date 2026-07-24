@@ -8,10 +8,15 @@ RUN set -ex \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-# Pin scws to the latest stable release (1.2.3) for reproducible builds.
+# Pin scws to the release 1.2.3 commit SHA for reproducible, supply-chain-safe builds.
+# Bump this ARG to upgrade scws (see https://github.com/hightman/scws/releases).
+ARG SCWS_COMMIT=a04ef5e655213eb6b07fb57761d0eac72c281ad4
 RUN set -ex \
-  && git clone --branch 1.2.3 --single-branch --depth 1 https://github.com/hightman/scws.git \
+  && git init scws \
   && cd scws \
+  && git remote add origin https://github.com/hightman/scws.git \
+  && git fetch --depth 1 origin "${SCWS_COMMIT}" \
+  && git checkout "${SCWS_COMMIT}" \
   && touch README && aclocal && autoconf && autoheader && libtoolize && automake --add-missing \
   && ./configure \
   && make install
