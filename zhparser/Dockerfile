@@ -4,7 +4,7 @@ FROM postgres:${PG_CONTAINER_VERSION} AS builder
 ARG DEBIAN_FRONTEND=noninteractive
 RUN set -ex \
   && apt-get update \
-  && apt-get install -y --no-install-recommends build-essential git postgresql-server-dev-${PG_MAJOR} pkg-config binutils automake libtool \
+  && apt-get install -y --no-install-recommends build-essential git ca-certificates postgresql-server-dev-${PG_MAJOR} pkg-config binutils automake libtool \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
