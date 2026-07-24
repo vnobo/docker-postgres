@@ -14,9 +14,6 @@ env:
   DOCKERHUB_REGISTRY: docker.io
   IMAGE_NAME: postgres
   POSTGRES_VERSION: "18"
-  # Docker Hub publishing is optional: set DOCKER_USERNAME / DOCKER_PASSWORD repo secrets.
-  # When unset, DOCKERHUB_IMAGE is empty and the Docker Hub login + push are skipped.
-  DOCKERHUB_IMAGE: ${{ secrets.DOCKER_USERNAME != '' && format('docker.io/{0}/postgres', secrets.DOCKER_USERNAME) || '' }}
 
 permissions:
   contents: read
@@ -25,6 +22,10 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # Docker Hub publishing is optional: set DOCKER_USERNAME / DOCKER_PASSWORD repo secrets.
+      # When unset, DOCKERHUB_IMAGE is empty and the Docker Hub login + push are skipped.
+      DOCKERHUB_IMAGE: ${{ secrets.DOCKER_USERNAME != '' && format('docker.io/{0}/postgres', secrets.DOCKER_USERNAME) || '' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
