@@ -1,71 +1,75 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
-name: Postgresql Build
-run-name: ${{ github.actor }} is Build Postgresql 18 Actions
+name: Build postgres (base)
+
 on:
-  schedule:
-    - cron: "1 10 6 * *"
   push:
-    branches: [ "main" ]
-    tags:
-      - "v*"
-  release:
-    types: [ created ]
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '1 10 6 * *'
+
 env:
-  # Use docker.io for Docker Hub if empty
-  GITHUB_REGISTRY: ghcr.io/${{ github.actor }}
-  DOCKER_REGISTRY: docker.io/alexbob
+  REGISTRY: ghcr.io
+  DOCKERHUB_REGISTRY: docker.io
   IMAGE_NAME: postgres
-  POSTGRES_VERSION: 18
+  POSTGRES_VERSION: "18"
+  # Docker Hub publishing is optional: set DOCKER_USERNAME / DOCKER_PASSWORD repo secrets.
+  # When unset, DOCKERHUB_IMAGE is empty and the Docker Hub login + push are skipped.
+  DOCKERHUB_IMAGE: ${{ secrets.DOCKER_USERNAME != '' && format('docker.io/{0}/postgres', secrets.DOCKER_USERNAME) || '' }}
+
+permissions:
+  contents: read
+  packages: write
+
 jobs:
-  build-image:
-    environment: base
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Log into registry ${{ env.REGISTRY }}
+      - name: Log in to GHCR
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.GITHUB_REGISTRY }}
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.PAGK_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Log into registry docker.io
-        if: github.event_name != 'pull_request'
+      - name: Log in to Docker Hub
+        if: github.event_name != 'pull_request' && secrets.DOCKER_USERNAME != ''
         uses: docker/login-action@v3
         with:
-          registry: docker.io
+          registry: ${{ env.DOCKERHUB_REGISTRY }}
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Extract Docker metadata
+      - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
         with:
+          images: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
+            ${{ env.DOCKERHUB_IMAGE }}
           flavor: |
             latest=false
-          images: |
-            ${{ env.GITHUB_REGISTRY }}/${{ env.IMAGE_NAME }}
-            ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            ${{ env.POSTGRES_VERSION }}
+            type=raw,value=${{ env.POSTGRES_VERSION }}
+            type=ref,event=tag
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx
+      - name: Set up Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Build and push Docker images
-        id: build
+
+      - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          platforms: linux/amd64
           context: .
+          platforms: linux/amd64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: ${{ github.event_name != 'pull_request' && 'type=gha,mode=max' || '' }}

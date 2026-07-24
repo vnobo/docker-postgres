@@ -1,0 +1,4 @@
+# Normalize line endings to LF on checkout/commit so builds and diffs are
+# identical across Windows/macOS/Linux runners (avoids the git "LF will be
+# replaced by CRLF" warnings and noisy cross-platform diffs).
+* text=auto eol=lf

@@ -1,4 +1,4 @@
-name: Build postgres-postgis
+name: Build postgres-zhparser
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: '2 11 8 * *'
+    - cron: '3 12 7 * *'
 
 env:
   REGISTRY: ghcr.io
@@ -53,8 +53,8 @@ jobs:
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
             ${{ env.DOCKERHUB_IMAGE }}
           flavor: |
-            latest=true
-            suffix=-postgis
+            latest=false
+            suffix=-zhparser
           tags: |
             type=raw,value=${{ env.POSTGRES_VERSION }}
             type=ref,event=tag
@@ -67,7 +67,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: ./postgis
+          context: ./zhparser
           platforms: linux/amd64
           push: ${{ github.event_name != 'pull_request' }}
           load: ${{ github.event_name == 'pull_request' }}
@@ -80,7 +80,7 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           set -euo pipefail
-          IMAGE="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ env.POSTGRES_VERSION }}-postgis"
+          IMAGE="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ env.POSTGRES_VERSION }}-zhparser"
           docker run -d --name pgtest -e POSTGRES_PASSWORD=test -p 5432:5432 "$IMAGE"
           trap 'docker rm -f pgtest' EXIT
           for i in $(seq 1 30); do
