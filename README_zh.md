@@ -74,7 +74,7 @@ docker run --name pg \
 启用扩展，然后在[中文分词实战](#中文分词实战)中创建 `chinese` 文本搜索配置并尝试分词示例：
 
 ```sql
-CREATE EXTENSION IF NOT EXISTS zhparser;
+create extension if not exists zhparser;
 ```
 
 ## 中文分词实战
@@ -91,7 +91,7 @@ CREATE EXTENSION IF NOT EXISTS zhparser;
 像 `京A12345` 这样的车牌混合了汉字、拉丁字母与数字。zhparser 将其作为整体切分：
 
 ```sql
-SELECT to_tsvector('chinese', '京A12345');
+select to_tsvector('chinese', '京A12345');
 -- '京a12345':1
 ```
 
@@ -100,7 +100,7 @@ SELECT to_tsvector('chinese', '京A12345');
 当车牌是更长字符串的一部分时，周围的中文会被独立切分：
 
 ```sql
-SELECT to_tsvector('chinese', '北京市海淀区京A12345违法记录');
+select to_tsvector('chinese', '北京市海淀区京A12345违法记录');
 -- '北京':1 '北京市':2 '海淀区':3 '京a12345':4 '违法':5 '记录':6
 ```
 
@@ -109,16 +109,18 @@ SELECT to_tsvector('chinese', '北京市海淀区京A12345违法记录');
 默认情况下省份字母（`京A`、`沪B` …）可能被拆开。将其注册为自定义词并重新同步，使其始终作为一个词元：
 
 ```sql
-INSERT INTO zhparser.zhprs_custom_word VALUES ('京A'), ('沪B');
-SELECT sync_zhprs_custom_word();
-ALTER EXTENSION zhparser UPDATE;
+insert into zhparser.zhprs_custom_word
+values ('京A'),
+       ('沪B');
+select sync_zhprs_custom_word();
+alter extension zhparser update;
 ```
 
 同步后，重新运行案例 2 会保持 `京A` 完整，并使按车牌前缀搜索更可靠。可用 `ts_debug` 观察同步前后的切分差异：
 
 ```sql
 -- 注册自定义词前：省份前缀可能被拆开
-SELECT ts_debug('chinese', '京A12345违法记录');
+select ts_debug('chinese', '京A12345违法记录');
 -- 注册 '京A' 并执行 sync_zhprs_custom_word() 后：'京A' 是一个词元
 ```
 
@@ -129,42 +131,45 @@ SELECT ts_debug('chinese', '京A12345违法记录');
 
 ```sql
 -- 在 ghcr.io/vnobo/postgres:18-postgis 上执行
-CREATE EXTENSION IF NOT EXISTS postgis;
-CREATE EXTENSION IF NOT EXISTS zhparser;
+create extension if not exists postgis;
+create extension if not exists zhparser;
 
-DROP TEXT SEARCH CONFIGURATION IF EXISTS chinese;
-CREATE TEXT SEARCH CONFIGURATION chinese (PARSER = zhparser);
-ALTER TEXT SEARCH CONFIGURATION chinese ADD MAPPING FOR n,v,a,i,e,l,x WITH simple;
+drop text search configuration if exists chinese;
+create text search configuration chinese (parser = zhparser);
+alter text search configuration chinese add mapping for n,v,a,i,e,l,x with simple;
 
-CREATE TABLE vehicles (
-  id       serial PRIMARY KEY,
-  plate    text,                    -- 车牌号，例如 '京A12345'
-  address  text,                    -- 中文地址
-  location geometry(Point, 4326)    -- 经度/纬度
+create table vehicles
+(
+    id       serial primary key,
+    plate    text,                 -- 车牌号，例如 '京A12345'
+    address  text,                 -- 中文地址
+    location geometry(Point, 4326) -- 经度/纬度
 );
 
 -- 自动维护的中文搜索向量（PostgreSQL 12+ 生成列）
-ALTER TABLE vehicles ADD COLUMN search tsvector
-  GENERATED ALWAYS AS (
-    to_tsvector('chinese', coalesce(plate,'') || ' ' || coalesce(address,''))
-  ) STORED;
+alter table vehicles
+    add column search tsvector
+        generated always as (
+            to_tsvector('chinese', coalesce(plate, '') || ' ' || coalesce(address, ''))
+            ) stored;
 
-CREATE INDEX vehicles_search_gin ON vehicles USING gin (search);
-CREATE INDEX vehicles_loc_gist   ON vehicles USING gist (location);
+create index vehicles_search_gin on vehicles using gin (search);
+create index vehicles_loc_gist on vehicles using gist (location);
 
-INSERT INTO vehicles (plate, address, location) VALUES
-  ('京A12345', '北京市海淀区中关村南大街', ST_SetSRID(ST_MakePoint(116.316, 39.983), 4326)),
-  ('沪B67890', '上海市浦东新区世纪大道',   ST_SetSRID(ST_MakePoint(121.505, 31.239), 4326));
+insert into vehicles (plate, address, location)
+values ('京A12345', '北京市海淀区中关村南大街', ST_SetSRID(ST_MakePoint(116.316, 39.983), 4326)),
+       ('沪B67890', '上海市浦东新区世纪大道', ST_SetSRID(ST_MakePoint(121.505, 31.239), 4326));
 
 -- 关键词匹配 + 空间过滤（北京中心 50 km 内）
-SELECT plate, address,
+select plate,
+       address,
        ST_DistanceSphere(
-         location,
-         ST_SetSRID(ST_MakePoint(116.40, 39.90), 4326)
-       ) AS dist_m
-FROM vehicles
-WHERE search @@ to_tsquery('chinese', '北京')
-  AND ST_DWithin(
+               location,
+               ST_SetSRID(ST_MakePoint(116.40, 39.90), 4326)
+       ) as dist_m
+from vehicles
+where search @@ to_tsquery('chinese', '北京')
+  and ST_DWithin(
         location::geography,
         ST_SetSRID(ST_MakePoint(116.40, 39.90), 4326)::geography,
         50000
@@ -244,7 +249,7 @@ request 会构建并运行冒烟测试（执行 `zhparser.sql`）但不发布。
 
 ## 致谢
 
-这些镜像构建于多个开源项目之上：
+本项目镜像构建于多个开源项目之上：
 
 - [PostgreSQL](https://www.postgresql.org) —— 数据库引擎与官方 `postgres` 基础镜像。
 - [PostGIS](https://postgis.net) —— 地理空间扩展与 `postgis/postgis` 基础镜像。
