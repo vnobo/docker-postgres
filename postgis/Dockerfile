@@ -8,28 +8,24 @@ RUN set -ex \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-# Pin scws to the release 1.2.3 commit SHA for reproducible, supply-chain-safe builds.
-# Bump this ARG to upgrade scws (see https://github.com/hightman/scws/releases).
-ARG SCWS_COMMIT=a04ef5e655213eb6b07fb57761d0eac72c281ad4
+# Build scws from the latest master (not pinned; builds are not reproducible).
 RUN set -ex \
   && git init scws \
   && cd scws \
   && git remote add origin https://github.com/hightman/scws.git \
-  && git fetch --depth 1 origin "${SCWS_COMMIT}" \
-  && git checkout "${SCWS_COMMIT}" \
+  && git fetch --depth 1 origin master \
+  && git checkout FETCH_HEAD \
   && touch README && aclocal && autoconf && autoheader && libtoolize && automake --add-missing \
   && ./configure \
   && make install
 
-# Pin zhparser to an explicit commit SHA for reproducible, supply-chain-safe builds.
-# Bump this ARG to upgrade zhparser (see https://github.com/amutu/zhparser/commits/master).
-ARG ZHPARSER_COMMIT=2e995c4df672563992b4d7a147b8fa2d0d4cda6c
+# Build zhparser from the latest master (not pinned; builds are not reproducible).
 RUN set -ex \
   && git init zhparser \
   && cd zhparser \
   && git remote add origin https://github.com/amutu/zhparser.git \
-  && git fetch --depth 1 origin "${ZHPARSER_COMMIT}" \
-  && git checkout "${ZHPARSER_COMMIT}" \
+  && git fetch --depth 1 origin master \
+  && git checkout FETCH_HEAD \
   && make install
 
 FROM postgis/postgis:${PG_CONTAINER_VERSION}-3.6

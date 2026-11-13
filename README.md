@@ -13,14 +13,15 @@ Images are published to GitHub Container Registry, and optionally to Docker Hub 
 
 ## Tech stack & pinned versions
 
-| Component | Version | Source | Notes |
-| --- | --- | --- | --- |
-| PostgreSQL | 18 | `postgres:18` | Floating to latest 18.x patch (security). |
-| PostGIS | 3.6 (3.6.0) | `postgis/postgis:18-3.6` | Requires PostgreSQL 12–18. |
-| scws (SCWS) | 1.2.3 | [hightman/scws](https://github.com/hightman/scws) | Chinese word-segmentation C library; pinned to release tag. |
-| zhparser | commit `2e995c4` | [amutu/zhparser](https://github.com/amutu/zhparser) | Pinned to an explicit commit SHA for reproducible, supply-chain-safe builds. |
+| Component   | Version         | Source                                              | Notes                                                                                        |
+|-------------|-----------------|-----------------------------------------------------|----------------------------------------------------------------------------------------------|
+| PostgreSQL  | 18              | `postgres:18`                                       | Floating to latest 18.x patch (security).                                                    |
+| PostGIS     | 3.6 (3.6.0)     | `postgis/postgis:18-3.6`                            | Requires PostgreSQL 12–18.                                                                   |
+| scws (SCWS) | master (latest) | [hightman/scws](https://github.com/hightman/scws)   | Chinese word-segmentation C library; built from latest `master`, not pinned.                 |
+| zhparser    | master (latest) | [amutu/zhparser](https://github.com/amutu/zhparser) | Built from latest `master`; not pinned, so builds are not reproducible or supply-chain safe. |
 
-> **Upgrading zhparser:** bump `ARG ZHPARSER_COMMIT` in [`zhparser/Dockerfile`](./zhparser/Dockerfile) and [`postgis/Dockerfile`](./postgis/Dockerfile).
+> **Upgrading scws/zhparser:** builds track the upstream `master` HEAD automatically. To freeze a version, reintroduce a
+> pinned commit SHA in [`zhparser/Dockerfile`](./zhparser/Dockerfile) and [`postgis/Dockerfile`](./postgis/Dockerfile).
 
 ## Quick start
 
@@ -106,6 +107,17 @@ It asserts the extension installs, custom words sync, and Chinese text search (`
 ## CI/CD
 
 GitHub Actions build, smoke-test, and publish the images to `ghcr.io/vnobo/postgres` on push to `main`, on tags (`v*`), and on a monthly schedule. Pull requests build and run a smoke test (executing `zhparser.sql`) without publishing. Docker Hub publishing is optional and requires `DOCKER_USERNAME` / `DOCKER_PASSWORD` secrets.
+
+## Acknowledgements
+
+These images build on the work of several open-source projects:
+
+- [PostgreSQL](https://www.postgresql.org) — the database engine and official `postgres` base images.
+- [PostGIS](https://postgis.net) — geospatial extension and the `postgis/postgis` base images.
+- [scws (SCWS)](https://github.com/hightman/scws) — Chinese word-segmentation C library that zhparser depends on.
+- [zhparser](https://github.com/amutu/zhparser) — PostgreSQL Chinese full-text parser.
+
+Thanks to their maintainers and contributors.
 
 ## License
 
