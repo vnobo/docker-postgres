@@ -8,13 +8,15 @@ RUN set -ex \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-# Build scws from the latest master (not pinned; builds are not reproducible).
+# Pin scws to the 1.2.3 release commit: upstream master's Makefile.am uses a '#' comment
+# inside a rule that current automake rejects ("unportable"), breaking the build.
+ARG SCWS_COMMIT=a04ef5e655213eb6b07fb57761d0eac72c281ad4
 RUN set -ex \
   && git init scws \
   && cd scws \
   && git remote add origin https://github.com/hightman/scws.git \
-  && git fetch --depth 1 origin master \
-  && git checkout FETCH_HEAD \
+  && git fetch --depth 1 origin "${SCWS_COMMIT}" \
+  && git checkout "${SCWS_COMMIT}" \
   && touch README && aclocal && autoconf && autoheader && libtoolize && automake --add-missing \
   && ./configure \
   && make install

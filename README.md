@@ -17,11 +17,10 @@ Images are published to GitHub Container Registry, and optionally to Docker Hub 
 |-------------|-----------------|-----------------------------------------------------|----------------------------------------------------------------------------------------------|
 | PostgreSQL  | 18              | `postgres:18`                                       | Floating to latest 18.x patch (security).                                                    |
 | PostGIS     | 3.6 (3.6.0)     | `postgis/postgis:18-3.6`                            | Requires PostgreSQL 12–18.                                                                   |
-| scws (SCWS) | master (latest) | [hightman/scws](https://github.com/hightman/scws)   | Chinese word-segmentation C library; built from latest `master`, not pinned.                 |
+| scws (SCWS) | 1.2.3 (`a04ef5e`) | [hightman/scws](https://github.com/hightman/scws) | Chinese word-segmentation C library; pinned to the 1.2.3 release commit because upstream `master` fails to build under the automake in the base image. |
 | zhparser    | master (latest) | [amutu/zhparser](https://github.com/amutu/zhparser) | Built from latest `master`; not pinned, so builds are not reproducible or supply-chain safe. |
 
-> **Upgrading scws/zhparser:** builds track the upstream `master` HEAD automatically. To freeze a version, reintroduce a
-> pinned commit SHA in [`zhparser/Dockerfile`](./zhparser/Dockerfile) and [`postgis/Dockerfile`](./postgis/Dockerfile).
+> **Upgrading:** scws is pinned to the 1.2.3 release commit (its `master` is broken under current automake); zhparser tracks upstream `master` HEAD. To change either, edit the relevant `ARG`/fetch in [`zhparser/Dockerfile`](./zhparser/Dockerfile) and [`postgis/Dockerfile`](./postgis/Dockerfile).
 
 ## Quick start
 
