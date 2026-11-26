@@ -1,4 +1,6 @@
-FROM postgres:18
+# Supplied by .env via docker compose / CI --build-arg; no hardcoded fallback.
+ARG PG_CONTAINER_VERSION
+FROM postgres:${PG_CONTAINER_VERSION} AS builder
 
 LABEL org.opencontainers.image.source=https://github.com/vnobo/docker-postgres.git
 LABEL org.opencontainers.image.description="Docker build postgresql database images,Set LANG zh_CN."

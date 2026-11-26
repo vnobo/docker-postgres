@@ -2,7 +2,7 @@
 
 > 本说明也有 [English 版本](./README.md)。
 
-基于 **PostgreSQL 18** 的 Docker 镜像，可选集成**中文全文检索**（[`zhparser`](https://github.com/amutu/zhparser)）与
+基于 **PostgreSQL 19** 的 Docker 镜像，可选集成**中文全文检索**（[`zhparser`](https://github.com/amutu/zhparser)）与
 **地理空间**（[PostGIS](https://postgis.net)）扩展。所有镜像均将系统 locale 设为 `zh_CN.UTF-8`、时区设为 `Asia/Shanghai`。
 
 镜像发布到 GitHub Container Registry；当配置了仓库 Secrets `DOCKER_USERNAME` / `DOCKER_PASSWORD` 时，也可发布到 Docker
@@ -10,24 +10,24 @@ Hub：
 
 | 标签                                    | 基础镜像                 | 扩展                      | 说明                                                                                                             |
 |-----------------------------------------|--------------------------|---------------------------|------------------------------------------------------------------------------------------------------------------|
-| `ghcr.io/vnobo/postgres:18`             | `postgres:18`            | —                         | PostgreSQL 18，带 `zh_CN.UTF-8` locale 与 `Asia/Shanghai` 时区。                                                 |
-| `ghcr.io/vnobo/postgres:18-zhparser`    | `postgres:18`            | zhparser + scws           | 增加中文全文检索。                                                                                               |
-| `ghcr.io/vnobo/postgres:18-postgis`     | `postgis/postgis:18-3.6` | PostGIS + zhparser + scws | 地理空间 + 中文全文检索。                                                                                        |
-| `ghcr.io/vnobo/postgres:latest-postgis` | `postgis/postgis:18-3.6` | PostGIS + zhparser + scws | 最近一次 `18-postgis` 构建的滚动 `latest` 别名（每次 `main`/tag 构建时推送）。**不建议用于固定版本的生产环境。** |
+| `ghcr.io/vnobo/postgres:19`             | `postgres:19`            | —                         | PostgreSQL 19，带 `zh_CN.UTF-8` locale 与 `Asia/Shanghai` 时区。                                                 |
+| `ghcr.io/vnobo/postgres:19-zhparser`    | `postgres:19`            | zhparser + scws           | 增加中文全文检索。                                                                                               |
+| `ghcr.io/vnobo/postgres:19-postgis`     | `postgis/postgis:19-3.6` | PostGIS + zhparser + scws | 地理空间 + 中文全文检索。                                                                                        |
+| `ghcr.io/vnobo/postgres:latest-postgis` | `postgis/postgis:19-3.6` | PostGIS + zhparser + scws | 最近一次 `19-postgis` 构建的滚动 `latest` 别名（每次 `main`/tag 构建时推送）。**不建议用于固定版本的生产环境。** |
 
 ## 目标读者与使用场景
 
-- **运维 / 决策者**：只想用现成 PostgreSQL 18 中文环境，或评估本仓库是否适用 —— 读镜像表与选型。
-- **应用开发者**：需要中文全文检索（车牌、地址、商品名等）—— 使用 `18-zhparser` 或 `18-postgis`。
+- **运维 / 决策者**：只想用现成 PostgreSQL 19 中文环境，或评估本仓库是否适用 —— 读镜像表与选型。
+- **应用开发者**：需要中文全文检索（车牌、地址、商品名等）—— 使用 `19-zhparser` 或 `19-postgis`。
 - **构建 / 维护者**：要改镜像、升级依赖或理解 CI 发布 —— 读“从源码构建 / CI/CD”。
 
 ## 镜像选型
 
 | 你的需求                              | 推荐标签                                |
 |---------------------------------------|-----------------------------------------|
-| 仅 PostgreSQL 18 + 中文 locale / 时区 | `:18`                                   |
-| 中文全文检索（无地理需求）            | `:18-zhparser`                          |
-| 中文检索 + 地理空间查询               | `:18-postgis`                           |
+| 仅 PostgreSQL 19 + 中文 locale / 时区 | `:19`                                   |
+| 中文全文检索（无地理需求）            | `:19-zhparser`                          |
+| 中文检索 + 地理空间查询               | `:19-postgis`                           |
 | 始终用最新 postgis 构建（滚动）       | `:latest-postgis`（不建议生产固定依赖） |
 
 ## 前置要求
@@ -38,10 +38,12 @@ Hub：
 
 ## 技术栈与钉死版本
 
+PostgreSQL 主版本统一在 [`.env`](./.env) 的 `PG_CONTAINER_VERSION` 中定义。`docker compose` 将其作为构建参数传给所有 Dockerfile；CI 读取同一文件，并通过 `--build-arg PG_CONTAINER_VERSION` 传给 `docker/build-push-action`。Dockerfile 中的 `ARG PG_CONTAINER_VERSION` 不再写死默认值，所有构建路径都必须显式传入。
+
 | 组件        | 版本              | 来源                                                | 说明                                                                                       |
 |-------------|-------------------|-----------------------------------------------------|--------------------------------------------------------------------------------------------|
-| PostgreSQL  | 18                | `postgres:18`                                       | 跟随最新 18.x 补丁（安全）。                                                               |
-| PostGIS     | 3.6 (3.6.0)       | `postgis/postgis:18-3.6`                            | 要求 PostgreSQL 12–18。                                                                    |
+| PostgreSQL  | 19                | `postgres:19`                                       | 跟随最新 19.x 补丁（安全）。                                                               |
+| PostGIS     | 3.6 (3.6.0)       | `postgis/postgis:19-3.6`                            | 要求 PostgreSQL 12–19。                                                                    |
 | scws (SCWS) | 1.2.3 (`a04ef5e`) | [hightman/scws](https://github.com/hightman/scws)   | 中文分词 C 库；钉死到 1.2.3 release commit，因为上游 `master` 在当前 automake 下构建失败。 |
 | zhparser    | master (latest)   | [amutu/zhparser](https://github.com/amutu/zhparser) | 构建自最新 `master`；未钉死，因此构建不可复现、供应链不安全。                              |
 
@@ -54,9 +56,9 @@ Hub：
 ### 拉取预构建镜像
 
 ```bash
-docker pull ghcr.io/vnobo/postgres:18
-docker pull ghcr.io/vnobo/postgres:18-zhparser
-docker pull ghcr.io/vnobo/postgres:18-postgis
+docker pull ghcr.io/vnobo/postgres:19
+docker pull ghcr.io/vnobo/postgres:19-zhparser
+docker pull ghcr.io/vnobo/postgres:19-postgis
 ```
 
 ### 运行并启用中文检索
@@ -68,7 +70,7 @@ docker run --name pg \
   -e POSTGRES_PASSWORD=secret \
   -p 5432:5432 \
   -v pgdata:/var/lib/postgresql/data \
-  -d ghcr.io/vnobo/postgres:18-zhparser
+  -d ghcr.io/vnobo/postgres:19-zhparser
 ```
 
 启用扩展，然后在[中文分词实战](#中文分词实战)中创建 `chinese` 文本搜索配置并尝试分词示例：
@@ -126,11 +128,11 @@ select ts_debug('chinese', '京A12345违法记录');
 
 ### 组合：中文分词 + PostGIS（地理搜索）
 
-在 `18-postgis` 镜像上，你可以同时索引中文文本**和**几何，并一次性联合查询 —— 例如“找出车牌/地址匹配关键词、且距某点 50 km
+在 `19-postgis` 镜像上，你可以同时索引中文文本**和**几何，并一次性联合查询 —— 例如“找出车牌/地址匹配关键词、且距某点 50 km
 内的车辆”：
 
 ```sql
--- 在 ghcr.io/vnobo/postgres:18-postgis 上执行
+-- 在 ghcr.io/vnobo/postgres:19-postgis 上执行
 create extension if not exists postgis;
 create extension if not exists zhparser;
 
@@ -183,31 +185,35 @@ where search @@ to_tsquery('chinese', '北京')
 
 ## 从源码构建
 
-每个镜像是一个独立的 Docker 构建上下文。
+每个镜像是一个独立的 Docker 构建上下文。[`docker-compose.yml`](./docker-compose.yml) 统一管理三个构建，并从 [`.env`](./.env) 读取 `PG_CONTAINER_VERSION`：
 
 ```bash
-# 基础 locale 镜像
-docker build -t postgres:18 .
-
-# zhparser 镜像
-docker build -t postgres:18-zhparser ./zhparser
-
-# postgis 镜像
-docker build -t postgres:18-postgis ./postgis
+# 构建基础、zhparser、postgis 三个镜像
+docker compose --profile build build
 ```
 
-重新指定 PostgreSQL 主版本：
+单独构建某个上下文时也需显式传入相同版本：
 
 ```bash
-docker build --build-arg PG_CONTAINER_VERSION=18 -t postgres:18 ./zhparser
+docker build --build-arg PG_CONTAINER_VERSION=19 -t postgres-local:19-zhparser ./zhparser
+```
+
+修改 `.env` 中的 `PG_CONTAINER_VERSION` 即可统一调整 compose 构建与 CI 版本；不带 `--build-arg` 的直接 `docker build` 按设计不再可用。
+
+### 用 compose 运行容器
+
+`db` 服务是本地开发快捷方式。`PG_IMAGE_SUFFIX`、`PG_PORT`、`POSTGRES_PASSWORD` 可在 `.env` 中覆盖（默认 `zhparser`、`5432`、`postgres`，仅供本地开发）：
+
+```bash
+docker compose up -d db
 ```
 
 ## 验证 zhparser 扩展
 
-[`zhparser/zhparser.sql`](./zhparser/zhparser.sql) 是一个幂等的验证脚本。在运行的 `18-zhparser` 或 `18-postgis` 容器上执行：
+[`zhparser/zhparser.sql`](./zhparser/zhparser.sql) 是一个幂等的验证脚本。在运行的 `19-zhparser` 或 `19-postgis` 容器上执行：
 
 ```bash
-docker run --rm -e POSTGRES_PASSWORD=test -p 5432:5432 postgres:18-zhparser &
+docker run --rm -e POSTGRES_PASSWORD=test -p 5432:5432 postgres-local:19-zhparser &
 psql -h localhost -U postgres -f zhparser/zhparser.sql
 ```
 
@@ -217,12 +223,14 @@ psql -h localhost -U postgres -f zhparser/zhparser.sql
 
 ```
 .
-├── Dockerfile              # 基础镜像：postgres:18 + zh_CN.UTF-8 locale + Asia/Shanghai 时区
+├── .env                    # 唯一版本源：PG_CONTAINER_VERSION
+├── docker-compose.yml      # 统一构建三个镜像，并提供本地 db 服务
+├── Dockerfile              # 基础镜像：postgres:${PG_CONTAINER_VERSION} + 中文 locale + 上海时区
 ├── zhparser/
-│   ├── Dockerfile          # scws + zhparser 多阶段构建，叠加在 postgres:18 上
+│   ├── Dockerfile          # scws + zhparser 多阶段构建，叠加在 postgres:19 上
 │   └── zhparser.sql        # 幂等的扩展验证 / 冒烟测试脚本
 ├── postgis/
-│   └── Dockerfile          # scws + zhparser 叠加在 postgis/postgis:18-3.6 上
+│   └── Dockerfile          # scws + zhparser 叠加在 postgis/postgis:19-3.6 上
 ├── .github/workflows/
 │   ├── postgres-build.yml      # 构建并发布基础镜像
 │   ├── postgres-zhparser.yml   # 构建并发布 zhparser 镜像（含冒烟测试）
@@ -236,13 +244,13 @@ psql -h localhost -U postgres -f zhparser/zhparser.sql
 
 GitHub Actions 在 push 到 `main`、打 `v*` 标签、以及月度定时任务时，构建、冒烟测试并发布镜像到 `ghcr.io/vnobo/postgres`。Pull
 request 会构建并运行冒烟测试（执行 `zhparser.sql`）但不发布。三个 workflow 也都支持通过 `workflow_dispatch` **手动触发**
-（Actions → *Run workflow*）。Docker Hub 发布是可选的，需要 `DOCKER_USERNAME` / `DOCKER_PASSWORD` Secrets。
+（Actions → *Run workflow*）。Docker Hub 发布是可选的，需要 `DOCKER_USERNAME` / `DOCKER_PASSWORD` Secrets。三个 workflow 均从 `.env` 读取 `PG_CONTAINER_VERSION`，确保 CI 与本地构建使用同一版本。
 
 ## 常见问题（FAQ）
 
 - **认证失败 / `role "postgres" does not exist`**：用 `-e POSTGRES_PASSWORD=...` 启动，并以
   `psql -U postgres -h localhost` 加该密码连接。
-- **`CREATE EXTENSION zhparser` 报找不到**：请使用 `18-zhparser` 或 `18-postgis` 镜像（基础 `:18` 不含该扩展）。
+- **`CREATE EXTENSION zhparser` 报找不到**：请使用 `19-zhparser` 或 `19-postgis` 镜像（基础 `:19` 不含该扩展）。
 - **中文检索无结果**：确认已创建 `chinese` 配置并做 `ADD MAPPING`（见实战章节），且查询用 `to_tsquery('chinese', ...)`
   而非普通字符串。
 - **数据随容器丢失**：运行时加 `-v <卷>:/var/lib/postgresql/data`（见快速开始）。

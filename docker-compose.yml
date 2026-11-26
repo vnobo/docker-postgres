@@ -1,0 +1,36 @@
+services:
+  base:
+    image: postgres-local:${PG_CONTAINER_VERSION}
+    build:
+      context: .
+      args:
+        PG_CONTAINER_VERSION: ${PG_CONTAINER_VERSION:?set PG_CONTAINER_VERSION in .env}
+    profiles: [build]
+
+  zhparser:
+    image: postgres-local:${PG_CONTAINER_VERSION}-zhparser
+    build:
+      context: ./zhparser
+      args:
+        PG_CONTAINER_VERSION: ${PG_CONTAINER_VERSION:?set PG_CONTAINER_VERSION in .env}
+    profiles: [build]
+
+  postgis:
+    image: postgres-local:${PG_CONTAINER_VERSION}-postgis
+    build:
+      context: ./postgis
+      args:
+        PG_CONTAINER_VERSION: ${PG_CONTAINER_VERSION:?set PG_CONTAINER_VERSION in .env}
+    profiles: [build]
+
+  db:
+    image: postgres-local:${PG_CONTAINER_VERSION}-${PG_IMAGE_SUFFIX:-zhparser}
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "${PG_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

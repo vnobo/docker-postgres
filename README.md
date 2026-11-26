@@ -2,23 +2,23 @@
 
 > Also available in [中文](./README_zh.md).
 
-Docker images for **PostgreSQL 18** with optional **Chinese full-text search** ([`zhparser`](https://github.com/amutu/zhparser)) and **geospatial** ([PostGIS](https://postgis.net)) extensions. All images set the system locale to `zh_CN.UTF-8` and the timezone to `Asia/Shanghai`.
+Docker images for **PostgreSQL 19** with optional **Chinese full-text search** ([`zhparser`](https://github.com/amutu/zhparser)) and **geospatial** ([PostGIS](https://postgis.net)) extensions. All images set the system locale to `zh_CN.UTF-8` and the timezone to `Asia/Shanghai`.
 
 Images are published to GitHub Container Registry, and optionally to Docker Hub when `DOCKER_USERNAME` / `DOCKER_PASSWORD` repository secrets are configured:
 
 | Tag                                     | Base image               | Extensions                | Description                                                                                                                         |
 |-----------------------------------------|--------------------------|---------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
-| `ghcr.io/vnobo/postgres:18`             | `postgres:18`            | —                         | PostgreSQL 18 with `zh_CN.UTF-8` locale and `Asia/Shanghai` timezone.                                                               |
-| `ghcr.io/vnobo/postgres:18-zhparser`    | `postgres:18`            | zhparser + scws           | Adds Chinese full-text search.                                                                                                      |
-| `ghcr.io/vnobo/postgres:18-postgis`     | `postgis/postgis:18-3.6` | PostGIS + zhparser + scws | Geospatial + Chinese full-text search.                                                                                              |
-| `ghcr.io/vnobo/postgres:latest-postgis` | `postgis/postgis:18-3.6` | PostGIS + zhparser + scws | Rolling `latest` alias of the most recent `18-postgis` build (pushed on every `main`/tag build). **Not for pinned production use.** |
+| `ghcr.io/vnobo/postgres:19`             | `postgres:19`            | —                         | PostgreSQL 19 with `zh_CN.UTF-8` locale and `Asia/Shanghai` timezone.                                                               |
+| `ghcr.io/vnobo/postgres:19-zhparser`    | `postgres:19`            | zhparser + scws           | Adds Chinese full-text search.                                                                                                      |
+| `ghcr.io/vnobo/postgres:19-postgis`     | `postgis/postgis:19-3.6` | PostGIS + zhparser + scws | Geospatial + Chinese full-text search.                                                                                              |
+| `ghcr.io/vnobo/postgres:latest-postgis` | `postgis/postgis:19-3.6` | PostGIS + zhparser + scws | Rolling `latest` alias of the most recent `19-postgis` build (pushed on every `main`/tag build). **Not for pinned production use.** |
 
 ## Target audience & use cases
 
-- **Ops / decision makers**: want a ready-made PostgreSQL 18 Chinese environment, or evaluating whether this repo fits —
+- **Ops / decision makers**: want a ready-made PostgreSQL 19 Chinese environment, or evaluating whether this repo fits —
   read the image table and selection guide.
 - **Application developers**: need Chinese full-text search (license plates, addresses, product names, etc.) — use
-  `18-zhparser` or `18-postgis`.
+  `19-zhparser` or `19-postgis`.
 - **Build / maintenance**: change images, upgrade dependencies, or understand CI publishing — read "Build from source /
   CI/CD".
 
@@ -26,9 +26,9 @@ Images are published to GitHub Container Registry, and optionally to Docker Hub 
 
 | Your need                                      | Recommended tag                                               |
 |------------------------------------------------|---------------------------------------------------------------|
-| PostgreSQL 18 + Chinese locale / timezone only | `:18`                                                         |
-| Chinese full-text search (no geospatial)       | `:18-zhparser`                                                |
-| Chinese search + geospatial queries            | `:18-postgis`                                                 |
+| PostgreSQL 19 + Chinese locale / timezone only | `:19`                                                         |
+| Chinese full-text search (no geospatial)       | `:19-zhparser`                                                |
+| Chinese search + geospatial queries            | `:19-postgis`                                                 |
 | Always the latest postgis build (rolling)      | `:latest-postgis` (not recommended for pinned production use) |
 
 ## Prerequisites
@@ -39,10 +39,12 @@ Images are published to GitHub Container Registry, and optionally to Docker Hub 
 
 ## Tech stack & pinned versions
 
+The PostgreSQL major version is defined once in [`.env`](./.env) as `PG_CONTAINER_VERSION`. `docker compose` passes it as a build arg to every Dockerfile; CI reads the same file and passes `--build-arg PG_CONTAINER_VERSION` to `docker/build-push-action`. The Dockerfiles declare `ARG PG_CONTAINER_VERSION` without a hardcoded default, so every build path must supply it.
+
 | Component   | Version         | Source                                              | Notes                                                                                        |
 |-------------|-----------------|-----------------------------------------------------|----------------------------------------------------------------------------------------------|
-| PostgreSQL  | 18              | `postgres:18`                                       | Floating to latest 18.x patch (security).                                                    |
-| PostGIS     | 3.6 (3.6.0)     | `postgis/postgis:18-3.6`                            | Requires PostgreSQL 12–18.                                                                   |
+| PostgreSQL  | 19              | `postgres:19`                                       | Floating to latest 19.x patch (security).                                                    |
+| PostGIS     | 3.6 (3.6.0)     | `postgis/postgis:19-3.6`                            | Requires PostgreSQL 12–19.                                                                   |
 | scws (SCWS) | 1.2.3 (`a04ef5e`) | [hightman/scws](https://github.com/hightman/scws) | Chinese word-segmentation C library; pinned to the 1.2.3 release commit because upstream `master` fails to build under the automake in the base image. |
 | zhparser    | master (latest) | [amutu/zhparser](https://github.com/amutu/zhparser) | Built from latest `master`; not pinned, so builds are not reproducible or supply-chain safe. |
 
@@ -53,9 +55,9 @@ Images are published to GitHub Container Registry, and optionally to Docker Hub 
 ### Pull a prebuilt image
 
 ```bash
-docker pull ghcr.io/vnobo/postgres:18
-docker pull ghcr.io/vnobo/postgres:18-zhparser
-docker pull ghcr.io/vnobo/postgres:18-postgis
+docker pull ghcr.io/vnobo/postgres:19
+docker pull ghcr.io/vnobo/postgres:19-zhparser
+docker pull ghcr.io/vnobo/postgres:19-postgis
 ```
 
 ### Run with Chinese search enabled
@@ -67,7 +69,7 @@ docker run --name pg \
   -e POSTGRES_PASSWORD=secret \
   -p 5432:5432 \
   -v pgdata:/var/lib/postgresql/data \
-  -d ghcr.io/vnobo/postgres:18-zhparser
+  -d ghcr.io/vnobo/postgres:19-zhparser
 ```
 
 Enable the extension, then create the `chinese` text search configuration and try the segmentation examples
@@ -130,11 +132,11 @@ select ts_debug('chinese', '京A12345违法记录');
 
 ### Combined: Chinese segmentation + PostGIS (geospatial search)
 
-On the `18-postgis` image you can index Chinese text **and** geometry, then query both at once — e.g. "find vehicles
+On the `19-postgis` image you can index Chinese text **and** geometry, then query both at once — e.g. "find vehicles
 whose plate/address matches a keyword and that are within 50 km of a point":
 
 ```sql
--- on ghcr.io/vnobo/postgres:18-postgis
+-- on ghcr.io/vnobo/postgres:19-postgis
 CREATE EXTENSION IF NOT EXISTS postgis;
 CREATE EXTENSION IF NOT EXISTS zhparser;
 
@@ -188,31 +190,35 @@ The `GIN` index accelerates the `@@` full-text match; the `GiST` index accelerat
 
 ## Build from source
 
-Each image is an independent Docker build context.
+Each image is an independent Docker build context. [`docker-compose.yml`](./docker-compose.yml) defines all three builds and reads `PG_CONTAINER_VERSION` from [`.env`](./.env):
 
 ```bash
-# Base locale image
-docker build -t postgres:18 .
-
-# zhparser image
-docker build -t postgres:18-zhparser ./zhparser
-
-# postgis image
-docker build -t postgres:18-postgis ./postgis
+# Build base, zhparser and postgis images
+docker compose --profile build build
 ```
 
-Retarget the PostgreSQL major version:
+To build a single context directly, pass the same version explicitly:
 
 ```bash
-docker build --build-arg PG_CONTAINER_VERSION=18 -t postgres:18 ./zhparser
+docker build --build-arg PG_CONTAINER_VERSION=19 -t postgres-local:19-zhparser ./zhparser
+```
+
+Change `PG_CONTAINER_VERSION` in `.env` to retarget all compose builds and CI; direct `docker build` without `--build-arg` no longer works by design.
+
+### Run a container with compose
+
+The `db` service is a local development shortcut. `PG_IMAGE_SUFFIX`, `PG_PORT` and `POSTGRES_PASSWORD` can be set in `.env` (defaults: `zhparser`, `5432`, `postgres` — local only).
+
+```bash
+docker compose up -d db
 ```
 
 ## Verify the zhparser extension
 
-[`zhparser/zhparser.sql`](./zhparser/zhparser.sql) is an idempotent verification script. Run it against a running `18-zhparser` or `18-postgis` container:
+[`zhparser/zhparser.sql`](./zhparser/zhparser.sql) is an idempotent verification script. Run it against a running `19-zhparser` or `19-postgis` container:
 
 ```bash
-docker run --rm -e POSTGRES_PASSWORD=test -p 5432:5432 postgres:18-zhparser &
+docker run --rm -e POSTGRES_PASSWORD=test -p 5432:5432 postgres-local:19-zhparser &
 psql -h localhost -U postgres -f zhparser/zhparser.sql
 ```
 
@@ -222,12 +228,14 @@ It asserts the extension installs, custom words sync, and Chinese text search (`
 
 ```
 .
-├── Dockerfile              # Base image: postgres:18 + zh_CN.UTF-8 locale + Asia/Shanghai TZ
+├── .env                    # Single source of truth: PG_CONTAINER_VERSION
+├── docker-compose.yml      # Builds all images; optional local `db` service
+├── Dockerfile              # Base image: postgres:${PG_CONTAINER_VERSION} + locales + Asia/Shanghai TZ
 ├── zhparser/
-│   ├── Dockerfile          # Multi-stage build of scws + zhparser, layered on postgres:18
+│   ├── Dockerfile          # Multi-stage build of scws + zhparser, layered on postgres:19
 │   └── zhparser.sql        # Idempotent extension verification / smoke-test script
 ├── postgis/
-│   └── Dockerfile          # scws + zhparser layered on postgis/postgis:18-3.6
+│   └── Dockerfile          # scws + zhparser layered on postgis/postgis:19-3.6
 ├── .github/workflows/
 │   ├── postgres-build.yml      # Builds & publishes the base image
 │   ├── postgres-zhparser.yml   # Builds & publishes the zhparser image (+ smoke test)
@@ -242,13 +250,14 @@ It asserts the extension installs, custom words sync, and Chinese text search (`
 GitHub Actions build, smoke-test, and publish the images to `ghcr.io/vnobo/postgres` on push to `main`, on tags (`v*`),
 and on a monthly schedule. Pull requests build and run a smoke test (executing `zhparser.sql`) without publishing. All
 three workflows also support **manual runs** via `workflow_dispatch` (Actions → *Run workflow*). Docker Hub publishing
-is optional and requires `DOCKER_USERNAME` / `DOCKER_PASSWORD` secrets.
+is optional and requires `DOCKER_USERNAME` / `DOCKER_PASSWORD` secrets. All three workflows read `PG_CONTAINER_VERSION`
+from `.env`, so CI and local builds use the same version.
 
 ## FAQ
 
 - **Auth failure / `role "postgres" does not exist`**: start with `-e POSTGRES_PASSWORD=...` and connect with
   `psql -U postgres -h localhost` using that password.
-- **`CREATE EXTENSION zhparser` not found**: use the `18-zhparser` or `18-postgis` image (the base `:18` does not
+- **`CREATE EXTENSION zhparser` not found**: use the `19-zhparser` or `19-postgis` image (the base `:19` does not
   include the extension).
 - **Chinese search returns nothing**: make sure the `chinese` configuration is created with `ADD MAPPING` (see practice
   section) and query with `to_tsquery('chinese', ...)` rather than a plain string.

@@ -1,4 +1,5 @@
-ARG PG_CONTAINER_VERSION=18
+# Supplied by .env via docker compose / CI --build-arg; no hardcoded fallback.
+ARG PG_CONTAINER_VERSION
 FROM postgres:${PG_CONTAINER_VERSION} AS builder
 
 ARG DEBIAN_FRONTEND=noninteractive
