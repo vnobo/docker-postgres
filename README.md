@@ -10,8 +10,8 @@ Images are published to GitHub Container Registry, and optionally to Docker Hub 
 |-----------------------------------------|--------------------------|---------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
 | `ghcr.io/vnobo/postgres:19`             | `postgres:19`            | —                         | PostgreSQL 19 with `zh_CN.UTF-8` locale and `Asia/Shanghai` timezone.                                                               |
 | `ghcr.io/vnobo/postgres:19-zhparser`    | `postgres:19`            | zhparser + scws           | Adds Chinese full-text search.                                                                                                      |
-| `ghcr.io/vnobo/postgres:19-postgis`     | `postgis/postgis:19-3.6` | PostGIS + zhparser + scws | Geospatial + Chinese full-text search.                                                                                              |
-| `ghcr.io/vnobo/postgres:latest-postgis` | `postgis/postgis:19-3.6` | PostGIS + zhparser + scws | Rolling `latest` alias of the most recent `19-postgis` build (pushed on every `main`/tag build). **Not for pinned production use.** |
+| `ghcr.io/vnobo/postgres:19-postgis`     | `postgis/postgis:19-3.7` | PostGIS + zhparser + scws | Geospatial + Chinese full-text search.                                                                                              |
+| `ghcr.io/vnobo/postgres:latest-postgis` | `postgis/postgis:19-3.7` | PostGIS + zhparser + scws | Rolling `latest` alias of the most recent `19-postgis` build (pushed on every `main`/tag build). **Not for pinned production use.** |
 
 ## Target audience & use cases
 
@@ -39,16 +39,16 @@ Images are published to GitHub Container Registry, and optionally to Docker Hub 
 
 ## Tech stack & pinned versions
 
-The PostgreSQL major version is defined once in [`.env`](./.env) as `PG_CONTAINER_VERSION`. `docker compose` passes it as a build arg to every Dockerfile; CI reads the same file and passes `--build-arg PG_CONTAINER_VERSION` to `docker/build-push-action`. The Dockerfiles declare `ARG PG_CONTAINER_VERSION` without a hardcoded default, so every build path must supply it.
+Image versions are defined once in [`.env`](./.env): `PG_CONTAINER_VERSION` (PostgreSQL major) and `POSTGIS_VERSION` (PostGIS minor). `docker compose` passes them as build args; CI reads the same file and passes the matching `--build-arg` values to `docker/build-push-action`. The Dockerfiles declare these `ARG`s without hardcoded defaults, so every build path must supply them.
 
 | Component   | Version         | Source                                              | Notes                                                                                        |
 |-------------|-----------------|-----------------------------------------------------|----------------------------------------------------------------------------------------------|
 | PostgreSQL  | 19              | `postgres:19`                                       | Floating to latest 19.x patch (security).                                                    |
-| PostGIS     | 3.6 (3.6.0)     | `postgis/postgis:19-3.6`                            | Requires PostgreSQL 12–19.                                                                   |
+| PostGIS     | 3.7 (3.7.0)     | `postgis/postgis:19-3.7`                            | Upstream stopped updating `*-3.6`; requires PostgreSQL 14–19.                                |
 | scws (SCWS) | 1.2.3 (`a04ef5e`) | [hightman/scws](https://github.com/hightman/scws) | Chinese word-segmentation C library; pinned to the 1.2.3 release commit because upstream `master` fails to build under the automake in the base image. |
 | zhparser    | master (latest) | [amutu/zhparser](https://github.com/amutu/zhparser) | Built from latest `master`; not pinned, so builds are not reproducible or supply-chain safe. |
 
-> **Upgrading:** scws is pinned to the 1.2.3 release commit (its `master` is broken under current automake); zhparser tracks upstream `master` HEAD. To change either, edit the relevant `ARG`/fetch in [`zhparser/Dockerfile`](./zhparser/Dockerfile) and [`postgis/Dockerfile`](./postgis/Dockerfile).
+> **Upgrading:** scws is pinned to the 1.2.3 release commit (its `master` is broken under current automake); zhparser tracks upstream `master` HEAD. To change either, edit the relevant `ARG`/fetch in [`zhparser/Dockerfile`](./zhparser/Dockerfile) and [`postgis/Dockerfile`](./postgis/Dockerfile). PostGIS 3.7 drops `postgis_tiger_geocoder`, `address_standardizer` and `h3`; PostgreSQL 18+ images mount data at `/var/lib/postgresql`.
 
 ## Quick start
 
@@ -68,7 +68,7 @@ Persist data with a named volume so it survives container removal:
 docker run --name pg \
   -e POSTGRES_PASSWORD=secret \
   -p 5432:5432 \
-  -v pgdata:/var/lib/postgresql/data \
+  -v pgdata:/var/lib/postgresql \
   -d ghcr.io/vnobo/postgres:19-zhparser
 ```
 
@@ -228,14 +228,14 @@ It asserts the extension installs, custom words sync, and Chinese text search (`
 
 ```
 .
-├── .env                    # Single source of truth: PG_CONTAINER_VERSION
+├── .env                    # Single source of truth: PG_CONTAINER_VERSION, POSTGIS_VERSION
 ├── docker-compose.yml      # Builds all images; optional local `db` service
 ├── Dockerfile              # Base image: postgres:${PG_CONTAINER_VERSION} + locales + Asia/Shanghai TZ
 ├── zhparser/
 │   ├── Dockerfile          # Multi-stage build of scws + zhparser, layered on postgres:19
 │   └── zhparser.sql        # Idempotent extension verification / smoke-test script
 ├── postgis/
-│   └── Dockerfile          # scws + zhparser layered on postgis/postgis:19-3.6
+│   └── Dockerfile          # scws + zhparser layered on postgis/postgis:19-3.7
 ├── .github/workflows/
 │   ├── postgres-build.yml      # Builds & publishes the base image
 │   ├── postgres-zhparser.yml   # Builds & publishes the zhparser image (+ smoke test)
@@ -250,8 +250,8 @@ It asserts the extension installs, custom words sync, and Chinese text search (`
 GitHub Actions build, smoke-test, and publish the images to `ghcr.io/vnobo/postgres` on push to `main`, on tags (`v*`),
 and on a monthly schedule. Pull requests build and run a smoke test (executing `zhparser.sql`) without publishing. All
 three workflows also support **manual runs** via `workflow_dispatch` (Actions → *Run workflow*). Docker Hub publishing
-is optional and requires `DOCKER_USERNAME` / `DOCKER_PASSWORD` secrets. All three workflows read `PG_CONTAINER_VERSION`
-from `.env`, so CI and local builds use the same version.
+is optional and requires `DOCKER_USERNAME` / `DOCKER_PASSWORD` secrets. All workflows read image versions from `.env`,
+so CI and local builds use the same versions.
 
 ## FAQ
 
@@ -261,7 +261,7 @@ from `.env`, so CI and local builds use the same version.
   include the extension).
 - **Chinese search returns nothing**: make sure the `chinese` configuration is created with `ADD MAPPING` (see practice
   section) and query with `to_tsquery('chinese', ...)` rather than a plain string.
-- **Data lost when container is removed**: add `-v <volume>:/var/lib/postgresql/data` at runtime (see Quick start).
+- **Data lost when container is removed**: add `-v <volume>:/var/lib/postgresql` at runtime (see Quick start).
 
 ## Acknowledgements
 

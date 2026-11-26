@@ -21,6 +21,7 @@ services:
       context: ./postgis
       args:
         PG_CONTAINER_VERSION: ${PG_CONTAINER_VERSION:?set PG_CONTAINER_VERSION in .env}
+        POSTGIS_VERSION: ${POSTGIS_VERSION:?set POSTGIS_VERSION in .env}
     profiles: [build]
 
   db:
@@ -30,7 +31,7 @@ services:
     ports:
       - "${PG_PORT:-5432}:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql
 
 volumes:
   pgdata:

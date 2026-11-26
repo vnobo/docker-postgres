@@ -30,13 +30,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Read PostgreSQL version
+      - name: Read image versions
         run: |
           set -a
           . ./.env
           set +a
           test -n "$PG_CONTAINER_VERSION"
+          test -n "$POSTGIS_VERSION"
           echo "POSTGRES_VERSION=$PG_CONTAINER_VERSION" >> "$GITHUB_ENV"
+          echo "POSTGIS_VERSION=$POSTGIS_VERSION" >> "$GITHUB_ENV"
 
       - name: Log in to GHCR
         if: github.event_name != 'pull_request'
@@ -80,6 +82,7 @@ jobs:
           platforms: linux/amd64
           build-args: |
             PG_CONTAINER_VERSION=${{ env.POSTGRES_VERSION }}
+            POSTGIS_VERSION=${{ env.POSTGIS_VERSION }}
           push: ${{ github.event_name != 'pull_request' }}
           load: ${{ github.event_name == 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}

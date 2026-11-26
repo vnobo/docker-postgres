@@ -1,6 +1,7 @@
 # Supplied by .env via docker compose / CI --build-arg; no hardcoded fallback.
 ARG PG_CONTAINER_VERSION
-FROM postgis/postgis:${PG_CONTAINER_VERSION}-3.6 AS builder
+ARG POSTGIS_VERSION
+FROM postgis/postgis:${PG_CONTAINER_VERSION}-${POSTGIS_VERSION} AS builder
 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN set -ex \
@@ -31,7 +32,7 @@ RUN set -ex \
   && git checkout FETCH_HEAD \
   && make install
 
-FROM postgis/postgis:${PG_CONTAINER_VERSION}-3.6
+FROM postgis/postgis:${PG_CONTAINER_VERSION}-${POSTGIS_VERSION}
 RUN localedef -i zh_CN -c -f UTF-8 -A /usr/share/locale/locale.alias zh_CN.UTF-8
 ENV LANG=zh_CN.UTF-8
 

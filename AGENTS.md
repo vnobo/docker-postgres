@@ -27,7 +27,7 @@ no application code or test framework; everything is declarative Dockerfile/SQL.
        dictionaries. It also sets the `zh_CN.UTF-8` locale. This keeps the final image small and free of build
        toolchains.
 
-- **`postgis/` build context (`postgis/Dockerfile`)**: Layers zhparser *on top of* the official `postgis/postgis:19-3.6`
+- **`postgis/` build context (`postgis/Dockerfile`)**: Layers zhparser *on top of* the official `postgis/postgis:19-3.7`
   image rather than plain PostgreSQL. Its builder stage is nearly identical to `zhparser/` (same scws + zhparser compile
   steps) but starts from the PostGIS base, and the final stage copies the same zhparser artifacts into the PostGIS
   runtime image. PostGIS itself is already present in the base image, so this context only adds Chinese text search to
@@ -42,10 +42,10 @@ artifacts and copy the same set of files (`zhparser.so`, `libscws.*`, `extension
   them, and runs `ts_debug`/`to_tsvector`/`to_tsquery` assertions against sample Chinese strings. Run it against a
   running `19-zhparser` or `19-postgis` container to confirm the extension works.
 
-Build-time configuration is parameterized: `.env` is the single source of truth (`PG_CONTAINER_VERSION=19`), read by
-`docker-compose.yml` for local builds and by all CI workflows for image tags and `--build-arg`. Dockerfiles declare
-`ARG PG_CONTAINER_VERSION` without a hardcoded default, so every build path must supply it. `${PG_MAJOR}` (set by the
-upstream image) keeps `COPY --from=builder` paths correct across PostgreSQL minors.
+Build-time configuration is parameterized: `.env` is the single source of truth (`PG_CONTAINER_VERSION=19`,
+`POSTGIS_VERSION=3.7`), read by `docker-compose.yml` for local builds and by CI workflows for image tags and
+`--build-arg`. Dockerfiles declare these `ARG`s without hardcoded defaults, so every build path must supply them.
+`${PG_MAJOR}` (set by the upstream image) keeps `COPY --from=builder` paths correct across PostgreSQL minors.
 
 ## Common Commands
 
